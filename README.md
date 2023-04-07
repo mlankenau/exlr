@@ -38,7 +38,7 @@ The lr macro has a couple of options:
 The DSL generates a parse function so it can be used like this:
 
 ```elixir
-MyParse.parse("...")
+MyParser.parse("...")
 ```
 
 ExLR supports to define the terminals in place:
@@ -62,9 +62,9 @@ end
 These implicit terminals are supported:
 
 - Strings
-- :ws     (whitespaces)
-- :int    (e.g. 123)
-- :text   (e.g. foo)
+- :ws      (whitespaces)
+- :integer (e.g. 123)
+- :text    (e.g. foo)
 - :quoted_text (e.g. "foo")
 
 Terminals can also be defined with the DSL:

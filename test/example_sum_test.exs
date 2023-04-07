@@ -2,7 +2,7 @@ defmodule ExLR.DSLTest do
   use ExUnit.Case
   use ExLR
 
-  lr store_generated_code: true, skip_whitespaces: true do
+  lr skip_whitespaces: true do
     S <- S + "+" + :integer = fn ([a, _, b]) -> a + b end
     S <- :integer           = fn ([a]) -> a end
   end
