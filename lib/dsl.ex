@@ -10,7 +10,12 @@ defmodule ExLR do
   end
 
   defmacro lr(opts \\ [], do: body) do
-    {:__block__, _, list} = body
+    list =
+      body
+      |> case do
+        {:__block__, _, list} -> list
+        tupl -> [tupl]
+      end
 
     rules =
       list
