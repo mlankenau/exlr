@@ -2,7 +2,7 @@ defmodule ExLR.ExampleCustomTerminalsTest do
   use ExUnit.Case
   use ExLR
 
-  terminal :zip_code, chars: ?0..?9, min: 4, max: 5
+  terminal :zip_code, chars: ?0..?9, min: 4, max: 5, prio: 0
 
   lr skip_whitespaces: true do
     Address <- Zip + City = fn [zip, city] -> %{zip: zip, city: city} end

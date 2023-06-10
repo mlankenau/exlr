@@ -1,7 +1,6 @@
 defmodule ExLR.DSLErrorTest do
   use ExUnit.Case
-  require ExLR
-  import ExLR
+  use ExLR
 
   lr skip_whitespaces: true do
     L <- A = & &1

@@ -6,6 +6,8 @@ defmodule ExLR do
     quote do
       import ExLR
       require ExLR
+
+      @terminal_prios %{text: 99, integer: 1, quoted_text: 99}
     end
   end
 
@@ -115,6 +117,11 @@ defmodule ExLR do
       quote do
         lexer =
         unquote(terminals)
+        |> Enum.sort(fn
+          a, b when not is_binary(a) and is_binary(b) -> false
+          a, b when is_binary(a) and not is_binary(b) -> true
+          a, b -> Map.get(@terminal_prios, a) <= Map.get(@terminal_prios, b)
+        end)
         |> Enum.reduce(Lexer.init(unquote(opts)), fn t, acc ->
           terminal(t)
           |> case do
@@ -123,7 +130,6 @@ defmodule ExLR do
           end
         end)
       end
-
 
     generated_code =
       quote do
@@ -172,10 +178,17 @@ defmodule ExLR do
   defmacro terminal(name, opts) do
     min = Keyword.get(opts, :min, 1)
     max = Keyword.get(opts, :max, 99999999)
+    prio = Keyword.get(opts, :prio, 0)
+
+    prio_code = quote do
+      @terminal_prios Map.put(@terminal_prios, unquote(name), unquote(prio))
+    end
+
     cond do
       Keyword.get(opts, :chars) ->
         chars = Keyword.get(opts, :chars)
         quote do
+          unquote(prio_code)
           def terminal(unquote(name)) do
             ExLR.Lexer.Terminal.gen_terminal(unquote(name), unquote(chars), unquote(min), unquote(max))
           end
@@ -184,6 +197,7 @@ defmodule ExLR do
       Keyword.get(opts, :stop_chars) ->
         chars = Keyword.get(opts, :stop_chars)
         quote do
+          unquote(prio_code)
           def terminal(unquote(name)) do
             ExLR.Lexer.Terminal.gen_terminal_stop_chars(unquote(name), unquote(chars), unquote(min), unquote(max))
           end

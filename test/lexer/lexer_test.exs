@@ -76,4 +76,13 @@ defmodule ExLR.LexerTest do
       Lexer.scan("  \"a\" ", lexer)
     end
   end
+
+  test "Prefer integer over text" do
+    lexer =
+      Lexer.init(skip_whitespaces: true)
+      |> Lexer.add_terminal(:integer)
+      |> Lexer.add_terminal(:text)
+
+    assert Lexer.scan("49", lexer) == {:ok, [{:integer, 49, {0, 0}}, {:"$", nil, {0, 0}}]}
+  end
 end

@@ -13,6 +13,7 @@ defmodule ExLR.Lexer.Lexer do
   end
 
   def scan(s, lexer) when is_binary(s) do
+    lexer = put_in(lexer.terminals, lexer.terminals |> Enum.reverse)
     _scan_string(s, lexer)
     |> case do
       list when is_list(list) -> {:ok, list}
