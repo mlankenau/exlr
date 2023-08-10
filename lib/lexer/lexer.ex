@@ -36,7 +36,7 @@ defmodule ExLR.Lexer.Lexer do
           err -> err
         end
       :no_match ->
-        {:error, :unknown_symbol, lexer.sym_pos}
+        {:error, :unknown_symbol, lexer.sym_pos, String.slice(input, 0, 10)}
     end
   end
   def _scan_string("", lexer) do

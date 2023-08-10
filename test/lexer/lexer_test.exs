@@ -47,7 +47,7 @@ defmodule ExLR.LexerTest do
         Lexer.init()
         |> Lexer.add_terminal("foo")
 
-      assert {:error, :unknown_symbol, {0, 0}} = Lexer.scan("fou", lexer)
+      assert {:error, :unknown_symbol, {0, 0}, "u"} = Lexer.scan("fou", lexer)
     end
 
     test "single symbol, not at pos 0" do
@@ -55,7 +55,7 @@ defmodule ExLR.LexerTest do
         Lexer.init(skip_whitespaces: true)
         |> Lexer.add_terminal("foo")
 
-      assert {:error, :unknown_symbol, {0, 2}} = Lexer.scan("  fou", lexer)
+      assert {:error, :unknown_symbol, {0, 2}, "u"} = Lexer.scan("  fou", lexer)
     end
 
     test "show correct position of unknown symbol" do
@@ -63,7 +63,7 @@ defmodule ExLR.LexerTest do
         Lexer.init(skip_whitespaces: true)
         |> Lexer.add_terminal("foo")
 
-      assert {:error, :unknown_symbol, {0, 3}} = Lexer.scan("foo = ", lexer)
+      assert {:error, :unknown_symbol, {0, 3}, "= "} = Lexer.scan("foo = ", lexer)
     end
   end
 
