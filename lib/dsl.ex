@@ -7,7 +7,7 @@ defmodule ExLR do
       import ExLR
       require ExLR
 
-      @terminal_prios %{text: 99, integer: 1, quoted_text: 99}
+      @terminal_prios %{text: 99, integer: 1, float: 1, quoted_text: 99}
     end
   end
 
