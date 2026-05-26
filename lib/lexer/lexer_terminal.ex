@@ -3,6 +3,8 @@ defmodule ExLR.Lexer.Terminal do
             scan: nil,
             process: nil
 
+  @digits [?0, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9]
+
   def gen_terminal(name, possible_chars, min, max) do
     possible_chars = _prep_char_list(possible_chars)
                      |> List.flatten()
@@ -95,7 +97,7 @@ defmodule ExLR.Lexer.Terminal do
   end
   def generate(:integer) do
     scan = fn
-      char, _ when char in [?0, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9]->
+      char, _ when char in @digits ->
         {:match, :inside_integer}
 
       _, nil ->
@@ -111,6 +113,35 @@ defmodule ExLR.Lexer.Terminal do
       process: &String.to_integer/1
     }
   end
+
+  def generate(:float) do
+    scan = fn
+      char, nil when char in @digits ->
+        {:match, :before_point}
+
+      char, :before_point when char in @digits ->
+        {:match, :before_point}
+
+      ?., :before_point ->
+        {:match, :after_point}
+
+      char, :after_point when char in @digits ->
+        {:match, :after_point}
+
+      _, :after_point ->
+        :no_match_completed
+
+      _, _ ->
+        :no_match
+    end
+
+    %ExLR.Lexer.Terminal{
+      symbol: :float,
+      scan: scan,
+      process: &String.to_float/1
+    }
+  end
+
   def generate(:text) do
     scan = fn
       c, _ when c in (?a..?z) or c in (?A..?Z) or c in (?0..?9) ->

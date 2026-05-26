@@ -39,6 +39,17 @@ defmodule ExLR.LexerTest do
 
       assert {:ok, [{"a", "a", {0, 0}}, {"=", "=", {0, 2}}, {:integer, 123, {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("a = 123", lexer)
     end
+
+    test "floats" do
+      lexer =
+        Lexer.init(skip_whitespaces: true)
+        |> Lexer.add_terminal(:integer)
+        |> Lexer.add_terminal(:float)
+        |> Lexer.add_terminal("a")
+        |> Lexer.add_terminal("=")
+
+      assert {:ok, [{"a", "a", {0, 0}}, {"=", "=", {0, 2}}, {:float, 123.456, {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("a = 123.456", lexer)
+    end
   end
 
   describe "error handling" do
