@@ -7,13 +7,15 @@ defmodule ExLR.Lexer.Lexer do
   def add_terminal(lexer, %Terminal{} = t) do
     %__MODULE__{lexer | terminals: [t | lexer.terminals]}
   end
+
   def add_terminal(lexer, t) do
     t = ExLR.Lexer.Terminal.generate(t)
     %__MODULE__{lexer | terminals: [t | lexer.terminals]}
   end
 
   def scan(s, lexer) when is_binary(s) do
-    lexer = put_in(lexer.terminals, lexer.terminals |> Enum.reverse)
+    lexer = put_in(lexer.terminals, lexer.terminals |> Enum.reverse())
+
     _scan_string(s, lexer)
     |> case do
       list when is_list(list) -> {:ok, list}
@@ -23,37 +25,45 @@ defmodule ExLR.Lexer.Lexer do
 
   @whitespaces [?\t, 0x20, ?\n, ?\r]
 
-  def _scan_string(<< c :: utf8 >> <> rem = input, lexer) do
+  def _scan_string(<<c::utf8>> <> rem = input, lexer) do
     _scan(c, lexer)
     |> case do
       {:continue, lexer} ->
         lexer = _change_pos(c, lexer)
         _scan_string(rem, lexer)
+
       {:out, sym, lexer} ->
         _scan_string(input, lexer)
         |> case do
           rem when is_list(rem) -> [sym | rem]
           err -> err
         end
+
       :no_match ->
         {:error, :unknown_symbol, lexer.sym_pos, String.slice(input, 0, 10)}
     end
   end
+
   def _scan_string("", lexer) do
     _scan(0, lexer)
     |> case do
       {:out, sym, _lexer} ->
         [sym, {:"$", nil, lexer.sym_pos}]
+
+      :no_match when lexer.buffer != "" ->
+        {:error, :unknown_symbol, lexer.sym_pos, lexer.buffer}
+
       :no_match ->
         [{:"$", nil, lexer.sym_pos}]
     end
   end
 
   def _change_pos(?\n, %{current_pos: {line, _pos}} = lexer) do
-    %__MODULE__{lexer | current_pos: {line+1, 0}}
+    %__MODULE__{lexer | current_pos: {line + 1, 0}}
   end
+
   def _change_pos(_, %{current_pos: {line, pos}} = lexer) do
-    %__MODULE__{lexer | current_pos: {line, pos+1}}
+    %__MODULE__{lexer | current_pos: {line, pos + 1}}
   end
 
   # no active terminals
@@ -76,8 +86,10 @@ defmodule ExLR.Lexer.Lexer do
           # we found no valid symbol
           :no_match
         end
+
       list ->
-        {:continue, %__MODULE__{scanner | active: list, buffer: << c >>, sym_pos: scanner.current_pos}}
+        {:continue,
+         %__MODULE__{scanner | active: list, buffer: <<c>>, sym_pos: scanner.current_pos}}
     end
   end
 
@@ -108,16 +120,18 @@ defmodule ExLR.Lexer.Lexer do
         _scan_end_of_terminal(scanner, completed)
 
       list ->
-        {:continue, %__MODULE__{scanner | active: list, buffer: scanner.buffer <> << c >>}}
+        {:continue, %__MODULE__{scanner | active: list, buffer: scanner.buffer <> <<c>>}}
     end
   end
 
   def _scan_end_of_terminal(_scanner, []) do
     :no_match
   end
-  def _scan_end_of_terminal(%{buffer: buffer} = scanner, [{%Terminal{symbol: symbol, process: process}, _value} | _]) do
-    val = process.(buffer)
-    {:out, {symbol, val, scanner.sym_pos}, %__MODULE__{scanner| buffer: "", active: []}}
-  end
 
+  def _scan_end_of_terminal(%{buffer: buffer} = scanner, [
+        {%Terminal{symbol: symbol, process: process}, _value} | _
+      ]) do
+    val = process.(buffer)
+    {:out, {symbol, val, scanner.sym_pos}, %__MODULE__{scanner | buffer: "", active: []}}
+  end
 end

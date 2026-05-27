@@ -8,7 +8,7 @@ defmodule ExLR.LexerTest do
         Lexer.init()
         |> Lexer.add_terminal("foo")
 
-      assert {:ok, [{"foo", "foo", {0,0}}, {:"$", nil, {0,0}}]} = Lexer.scan("foo", lexer)
+      assert {:ok, [{"foo", "foo", {0, 0}}, {:"$", nil, {0, 0}}]} = Lexer.scan("foo", lexer)
     end
 
     test "multiple symbol" do
@@ -17,7 +17,8 @@ defmodule ExLR.LexerTest do
         |> Lexer.add_terminal("foo")
         |> Lexer.add_terminal("bar")
 
-      assert {:ok, [{"foo", "foo", {0, 0}}, {"bar", "bar", {0, 3}}, {:"$", nil, {0, 3}}]} = Lexer.scan("foobar", lexer)
+      assert {:ok, [{"foo", "foo", {0, 0}}, {"bar", "bar", {0, 3}}, {:"$", nil, {0, 3}}]} =
+               Lexer.scan("foobar", lexer)
     end
 
     test "multiple symbol with whitespaces" do
@@ -26,7 +27,8 @@ defmodule ExLR.LexerTest do
         |> Lexer.add_terminal("foo")
         |> Lexer.add_terminal("bar")
 
-      assert {:ok, [{"foo", "foo", {0, 0}}, {"bar", "bar", {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("foo bar", lexer)
+      assert {:ok, [{"foo", "foo", {0, 0}}, {"bar", "bar", {0, 4}}, {:"$", nil, {0, 4}}]} =
+               Lexer.scan("foo bar", lexer)
     end
 
     test "more realistic example" do
@@ -36,7 +38,13 @@ defmodule ExLR.LexerTest do
         |> Lexer.add_terminal("a")
         |> Lexer.add_terminal("=")
 
-      assert {:ok, [{"a", "a", {0, 0}}, {"=", "=", {0, 2}}, {:integer, 123, {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("a = 123", lexer)
+      assert {:ok,
+              [
+                {"a", "a", {0, 0}},
+                {"=", "=", {0, 2}},
+                {:integer, 123, {0, 4}},
+                {:"$", nil, {0, 4}}
+              ]} = Lexer.scan("a = 123", lexer)
     end
 
     test "floats" do
@@ -47,8 +55,15 @@ defmodule ExLR.LexerTest do
         |> Lexer.add_terminal("a")
         |> Lexer.add_terminal("=")
 
-      assert {:ok, [{"a", "a", {0, 0}}, {"=", "=", {0, 2}}, {:float, 123.456, {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("a = 123.456", lexer)
-      assert {:ok, [{:"$", nil, {0, 0}}]} = Lexer.scan("123.", lexer)
+      assert {:ok,
+              [
+                {"a", "a", {0, 0}},
+                {"=", "=", {0, 2}},
+                {:float, 123.456, {0, 4}},
+                {:"$", nil, {0, 4}}
+              ]} = Lexer.scan("a = 123.456", lexer)
+
+      assert {:error, :unknown_symbol, {0, 0}, "123."} = Lexer.scan("123.", lexer)
     end
   end
 
@@ -78,12 +93,12 @@ defmodule ExLR.LexerTest do
     end
   end
 
-
   describe "special cases" do
     test "quoted text" do
       lexer =
         Lexer.init(skip_whitespaces: true)
         |> Lexer.add_terminal(:quoted_text)
+
       Lexer.scan("  \"a\" ", lexer)
     end
   end
