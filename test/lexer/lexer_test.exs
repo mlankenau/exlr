@@ -2,7 +2,6 @@ defmodule ExLR.LexerTest do
   use ExUnit.Case
   alias ExLR.Lexer.Lexer
 
-
   describe "scan" do
     test "single symbol" do
       lexer =
@@ -49,6 +48,7 @@ defmodule ExLR.LexerTest do
         |> Lexer.add_terminal("=")
 
       assert {:ok, [{"a", "a", {0, 0}}, {"=", "=", {0, 2}}, {:float, 123.456, {0, 4}}, {:"$", nil, {0, 4}}]} = Lexer.scan("a = 123.456", lexer)
+      assert {:ok, [{:"$", nil, {0, 0}}]} = Lexer.scan("123.", lexer)
     end
   end
 

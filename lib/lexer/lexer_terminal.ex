@@ -126,9 +126,12 @@ defmodule ExLR.Lexer.Terminal do
         {:match, :after_point}
 
       char, :after_point when char in @digits ->
-        {:match, :after_point}
+        {:match, :after_point_digits}
 
-      _, :after_point ->
+      char, :after_point_digits when char in @digits ->
+        {:match, :after_point_digits}
+
+      _, :after_point_digits ->
         :no_match_completed
 
       _, _ ->
